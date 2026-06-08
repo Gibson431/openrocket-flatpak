@@ -1,0 +1,39 @@
+app-id: info.openrocket.OpenRocket
+runtime: org.freedesktop.Platform
+runtime-version: '25.08'
+sdk: org.freedesktop.Sdk
+command: openrocket.sh
+
+sdk-extensions:
+  - org.freedesktop.Sdk.Extension.openjdk17
+
+finish-args:
+  - --share=ipc
+  - --share=network
+  - --socket=x11
+  - --device=dri
+  - --filesystem=home
+  - --env=PATH=/app/bin:/app/jre/bin:/usr/bin
+  - --env=JAVA_HOME=/app/jre
+
+modules:
+  - name: openjdk
+    buildsystem: simple
+    build-commands:
+      - /usr/lib/sdk/openjdk17/install.sh
+
+  - name: openrocket
+    buildsystem: simple
+    build-commands:
+      - install -Dm755 openrocket.sh /app/bin/openrocket.sh
+      - install -Dm644 OpenRocket.jar /app/share/java/OpenRocket.jar
+    sources:
+      - type: file
+        url: https://github.com/openrocket/openrocket/releases/download/release-24.12/OpenRocket-24.12.jar
+        sha256: 4959b72f52f5f607941e9722abbb7b7f0c4a38ebbbf84204a329db9f31c4f897
+        dest-filename: OpenRocket.jar
+      
+      - type: script
+        dest-filename: openrocket.sh
+        commands:
+          - exec java -jar /app/share/java/OpenRocket.jar "$@"
